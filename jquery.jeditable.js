@@ -275,11 +275,17 @@
                     });
                 } else if ('submit' == settings.onblur) {
                     input.blur(function(e) {
-                        /* Prevent double submit if submit was clicked. */
-                        t = setTimeout(function() {
-                            form.submit();
-                        }, 200);
-                    });
+					
+						// Only allow the blur to do the submissions if the user did not click on the submit button
+						// We check this by taking a look at the elements that the mouse is hovering over and see that none of them is of the type "submit"
+						// The original check to prevent such a duplicate submission worked by setting a timeout
+						// However, this would mean that a non-existing form element would get submitted, which resulted in a full page refresh
+						var target = document.querySelectorAll( ":hover" );
+					
+						if (! _.find(target, function(el) {return el.type == 'submit'}))
+							{	
+								form.submit();
+							}});
                 } else if ($.isFunction(settings.onblur)) {
                     input.blur(function(e) {
                         settings.onblur.apply(self, [input.val(), settings]);
