@@ -1,6 +1,6 @@
 {
   "name": "jquery-jeditable",
-  "version": "2.0.10",
+  "version": "2.0.16",
   "description": "Edit in place plugin for jQuery",
   "main": "src/jquery.jeditable.js",
   "directories": {
@@ -10,10 +10,12 @@
     "jquery": ">=3.4.0"
   },
   "devDependencies": {
-    "grunt": "^1.0.4",
+    "documentation": "^12.2.0",
+    "grunt": "^1.1.0",
     "grunt-contrib-uglify-es": "^3.3.0",
+    "lodash": "^4.17.15",
     "merge": ">=1.2.1",
-    "qunit": "^2.7.1"
+    "qunit": "^2.9.3"
   },
   "scripts": {
     "test": "firefox -new-tab tests/index.html"

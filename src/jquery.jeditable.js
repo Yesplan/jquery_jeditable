@@ -17,6 +17,7 @@
  * @param {Number} [options.cols] - Number of columns if using textarea
  * @param {String} [options.cssclass] - CSS class to apply to input form; use 'inherit' to copy from parent
  * @param {String} [options.inputcssclass] - CSS class to apply to input. 'inherit' to copy from parent
+ * @param {Function} [options.intercept] - Intercept the returned data so you have a chance to process it before returning it in the page
  * @param {String|Function} [options.data] - Content loaded in the form
  * @param {String} [options.event='click'] - jQuery event such as 'click' of 'dblclick'. See https://api.jquery.com/category/events/
  * @param {String} [options.formid] - Give an id to the form that is produced
@@ -89,7 +90,7 @@
         }
         if ('destroy' === target) {
             $(this)
-                .unbind($(this).data('event.editable'))
+                .off($(this).data('event.editable'))
                 .removeData('disabled.editable')
                 .removeData('event.editable');
             return;
@@ -136,7 +137,7 @@
             }
 
             // EVENT IS FIRED
-            $(this).bind(settings.event, function(e) {
+            $(this).on(settings.event, function(e) {
 
                 /* Abort if element is disabled. */
                 if (true === $(this).data('disabled.editable')) {
@@ -299,7 +300,7 @@
                 plugin.apply(form, [settings, self]);
 
                 /* Focus to first visible form element. */
-                form.find(':input:visible:enabled:first').focus();
+                form.find(':input:visible:enabled:first').trigger('focus');
 
                 /* Highlight input contents when requested. */
                 if (settings.select) {
@@ -307,24 +308,28 @@
                 }
 
                 /* discard changes if pressing esc */
-                $(this).keydown(function(e) {
+                $(this).on('keydown', function(e) {
                     if (e.which === 27) {
                         e.preventDefault();
                         reset.apply(form, [settings, self]);
+                    /* allow shift+enter to submit form (required for textarea) */
+                    } else if (e.which == 13 && e.shiftKey){
+                        e.preventDefault();
+                        form.trigger('submit');
                     }
                 });
 
                 /* Discard, submit or nothing with changes when clicking outside. */
                 /* Do nothing is usable when navigating with tab. */
                 if ('cancel' === settings.onblur) {
-                    input.blur(function(e) {
+                    input.on('blur', function(e) {
                         /* Prevent canceling if submit was clicked. */
                         t = self.setTimeout(function() {
                             reset.apply(form, [settings, self]);
                         }, 500);
                     });
                 } else if ('submit' === settings.onblur) {
-                    input.blur(function(e) {
+                    input.on('blur', function(e) {
 						// Only allow the blur to do the submissions if the user did not click on the submit button
 						// We check this by taking a look at the elements that the mouse is hovering over and see that none of them is of the type "submit"
 						// The original check to prevent such a duplicate submission worked by setting a timeout
@@ -336,7 +341,7 @@
 								form.submit();
 							}});
                 } else if ($.isFunction(settings.onblur)) {
-                    input.blur(function(e) {
+                    input.on('blur', function(e) {
                         // reset the form if the onblur function returns false
                         if (false === settings.onblur.apply(self, [input.val(), settings, form])) {
                             reset.apply(form, [settings, self]);
@@ -344,7 +349,7 @@
                     });
                 }
 
-                form.submit(function(e) {
+                form.on('submit', function(e) {
 
                     /* Do no submit. */
                     e.preventDefault();
@@ -378,7 +383,7 @@
                                   if (false !== complete) {
                                       $(self).html(value);
                                       self.editing = false;
-                                      callback.apply(self, [self.innerHTML, settings]);
+                                      callback.apply(self, [self.innerText, settings]);
                                       if (!$.trim($(self).html())) {
                                           $(self).html(settings.placeholder);
                                       }
@@ -460,7 +465,7 @@
                 if (self.editing) {
                     /* Before reset hook, if it returns false abort reseting. */
                     if (false !== onreset.apply(form, [settings, self])) {
-                        $(self).html(self.revert);
+                        $(self).text(self.revert);
                         self.editing   = false;
                         if (!$.trim($(self).html())) {
                             $(self).html(settings.placeholder);
@@ -476,7 +481,7 @@
             // DESTROY
             self.destroy = function(form) {
                 $(self)
-                .unbind($(self).data('event.editable'))
+                .off($(self).data('event.editable'))
                 .removeData('disabled.editable')
                 .removeData('event.editable');
 
@@ -563,9 +568,9 @@ var _supportInType = function (type) {
                     if (settings.submit) {
                         /* If given html string use that. */
                         if (settings.submit.match(/>$/)) {
-                            submit = $(settings.submit).click(function() {
+                            submit = $(settings.submit).on('click', function() {
                                 if (submit.attr('type') !== 'submit') {
-                                    form.submit();
+                                    form.trigger('submit');
                                 }
                             });
                         /* Otherwise use button with given string as text. */
@@ -593,7 +598,7 @@ var _supportInType = function (type) {
                         }
                         $(this).append(cancel);
 
-                        $(cancel).click(function(event) {
+                        $(cancel).on('click', function(event) {
                             var reset;
                             if ($.isFunction($.editable.types[settings.type].reset)) {
                                 reset = $.editable.types[settings.type].reset;
@@ -688,9 +693,21 @@ var _supportInType = function (type) {
                     // Create tuples for sorting
                     var tuples = [];
                     var key;
-                    for (key in json) {
-                        tuples.push([key, json[key]]); // Store: [key, value]
+
+                    if (Array.isArray(json) && json.every(Array.isArray)) {
+                        // Process list of tuples
+                        tuples = json // JSON already contains list of [key, value]
+                        json = {};
+                        tuples.forEach(function(e) {
+                            json[e[0]] = e[1]; // Recreate json object to comply with following code
+                        });
+                    } else {
+                        // Process object
+                        for (key in json) {
+                            tuples.push([key, json[key]]); // Store: [key, value]
+                        }
                     }
+
                     if (settings.sortselectoptions) {
                         // sort it
                         tuples.sort(function (a, b) {
@@ -725,7 +742,7 @@ var _supportInType = function (type) {
                     if (!settings.submit) {
                         var form = this;
                         $(this).find('select').change(function() {
-                            form.submit();
+                            form.trigger('submit');
                         });
                     }
                 }

@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.0.15
+
+* Remove deprecated .blur() calls and replace them with .on() (#211)
+
+## 2.0.14
+
+* Remove deprecated jQuery functions and replace them by modern counterparts (#211)
+
+## 2.0.13
+
+* Accept list of tuples as items for select element (#208 by @emjayko)
+
+## 2.0.12
+
+* Wrap the plugins in functions for non-conflict mode (#205)
+
+## 2.0.11
+
+* Use text() instead of html() for revert (#203)
+
 ## 2.0.10
 
 * Regenerate the minified files
