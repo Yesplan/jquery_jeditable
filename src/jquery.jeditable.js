@@ -433,6 +433,9 @@
                                       if (ajaxoptions.dataType === 'html') {
                                         $(self).html(result);
                                       }
+                                      if (ajaxoptions.dataType === 'text') {
+                                        $(self).text(result);
+                                      }
                                       self.editing = false;
                                       callback.apply(self, [result, settings, submitdata]);
                                       if (!$.trim($(self).html())) {
