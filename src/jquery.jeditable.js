@@ -381,7 +381,9 @@
                               var responseHandler = function(value, complete) {
                                   isSubmitting = false;
                                   if (false !== complete) {
-                                      $(self).html(value);
+                                      // INTERCEPT
+                                      var result = intercept.apply(self, [value, status]);
+                                      $(self).html(result);
                                       self.editing = false;
                                       callback.apply(self, [self.innerText, settings]);
                                       if (!$.trim($(self).html())) {
