@@ -95,52 +95,39 @@
                 .removeData('event.editable');
             return;
         }
-        var settings = $.extend({}, $.fn.editable.defaults, {target:target}, options);
+        var settings = $.extend({}, $.fn.editable.defaults, { target: target }, options);
 
         /* setup some functions */
-        var plugin   = $.editable.types[settings.type].plugin || function() { };
-        var submit   = $.editable.types[settings.type].submit || function() { };
-        var buttons  = $.editable.types[settings.type].buttons || $.editable.types.defaults.buttons;
-        var content  = $.editable.types[settings.type].content || $.editable.types.defaults.content;
-        var element  = $.editable.types[settings.type].element || $.editable.types.defaults.element;
-        var reset    = $.editable.types[settings.type].reset || $.editable.types.defaults.reset;
-        var destroy  = $.editable.types[settings.type].destroy || $.editable.types.defaults.destroy;
+        var plugin = $.editable.types[settings.type].plugin || function() { };
+        var submit = $.editable.types[settings.type].submit || function() { };
+        var buttons = $.editable.types[settings.type].buttons || $.editable.types.defaults.buttons;
+        var content = $.editable.types[settings.type].content || $.editable.types.defaults.content;
+        var element = $.editable.types[settings.type].element || $.editable.types.defaults.element;
+        var reset = $.editable.types[settings.type].reset || $.editable.types.defaults.reset;
+        var destroy = $.editable.types[settings.type].destroy || $.editable.types.defaults.destroy;
         var callback = settings.callback || function() { };
         var intercept = settings.intercept || function(s) { return s; };
-        var onedit   = settings.onedit   || function() { };
+        var onedit = settings.onedit || function() { };
         var onsubmit = settings.onsubmit || function() { };
-        var onreset  = settings.onreset  || function() { };
-        var onerror  = settings.onerror  || reset;
-        var before   = settings.before || false;
+        var onreset = settings.onreset || function() { };
+        var onerror = settings.onerror || reset;
+        var before = settings.before || false;
 
         // TOOLTIP
         if (settings.tooltip) {
-            $(this).attr('title', settings.tooltip);
+            $(this)
+                .attr('title', settings.tooltip);
         }
 
         return this.each(function() {
 
             /* Save this to self because this changes when scope changes. */
             var self = this;
-
-            /* Save so it can be later used by $.editable('destroy') */
-            $(this).data('event.editable', settings.event);
-
-            /* If element is empty add something clickable (if requested) */
-            if (!$.trim($(this).html())) {
-                $(this).html(settings.placeholder);
-            }
-
-            if ('destroy' === target) {
-                destroy.apply($(this).find('form'), [settings, self]);
-                return;
-            }
-
-            // EVENT IS FIRED
-            $(this).on(settings.event, function(e) {
+            var openEditable = function(e) {
 
                 /* Abort if element is disabled. */
-                if (true === $(this).data('disabled.editable')) {
+                if (true === $(this)
+                    .data('disabled.editable')) {
                     return;
                 }
 
@@ -156,7 +143,7 @@
 
                 /* Abort if onedit hook returns false. */
                 if (false === onedit.apply(this, [settings, self, e])) {
-                   return;
+                    return;
                 }
 
                 /* execute the before function if any was specified */
@@ -172,18 +159,26 @@
 
                 /* Remove tooltip. */
                 if (settings.tooltip) {
-                    $(self).removeAttr('title');
+                    $(self)
+                        .removeAttr('title');
                 }
 
                 /* Remove placeholder text, replace is here because of IE. */
-                if ($(this).html().toLowerCase().replace(/(;|"|\/)/g, '') ===
-                    settings.placeholder.toLowerCase().replace(/(;|"|\/)/g, '')) {
-                        $(this).html('');
+                if ($(this)
+                        .html()
+                        .toLowerCase()
+                        .replace(/(;|"|\/)/g, '') ===
+                    settings.placeholder.toLowerCase()
+                        .replace(/(;|"|\/)/g, '')) {
+                    $(this)
+                        .html('');
                 }
 
-                self.editing    = true;
-                self.revert     = $(self).text();
-                $(self).html('');
+                self.editing = true;
+                self.revert = $(self)
+                    .text();
+                $(self)
+                    .html('');
 
                 /* Create the form object. */
                 var form = $('<form />');
@@ -191,7 +186,8 @@
                 /* Apply css or style or both. */
                 if (settings.cssclass) {
                     if ('inherit' === settings.cssclass) {
-                        form.attr('class', $(self).attr('class'));
+                        form.attr('class', $(self)
+                            .attr('class'));
                     } else {
                         form.attr('class', settings.cssclass);
                     }
@@ -199,9 +195,11 @@
 
                 if (settings.style) {
                     if ('inherit' === settings.style) {
-                        form.attr('style', $(self).attr('style'));
+                        form.attr('style', $(self)
+                            .attr('style'));
                         /* IE needs the second line or display wont be inherited. */
-                        form.css('display', $(self).css('display'));
+                        form.css('display', $(self)
+                            .css('display'));
                     } else {
                         form.attr('style', settings.style);
                     }
@@ -222,7 +220,8 @@
 
                 if (settings.inputcssclass) {
                     if ('inherit' === settings.inputcssclass) {
-                        input.attr('class', $(self).attr('class'));
+                        input.attr('class', $(self)
+                            .attr('class'));
                     } else {
                         input.attr('class', settings.inputcssclass);
                     }
@@ -239,7 +238,8 @@
                     t = self.setTimeout(function() {
                         input.disabled = true;
                     }, 100);
-                    $(self).html(settings.loadtext);
+                    $(self)
+                        .html(settings.loadtext);
 
                     var loaddata = {};
                     loaddata[settings.id] = self.id;
@@ -249,16 +249,16 @@
                         $.extend(loaddata, settings.loaddata);
                     }
                     $.ajax({
-                       type : settings.loadtype,
-                       url  : settings.loadurl,
-                       data : loaddata,
-                       async: false,
-                       cache : false,
-                       success: function(result) {
-                          self.clearTimeout(t);
-                          input_content = result;
-                          input.disabled = false;
-                       }
+                        type: settings.loadtype,
+                        url: settings.loadurl,
+                        data: loaddata,
+                        async: false,
+                        cache: false,
+                        success: function(result) {
+                            self.clearTimeout(t);
+                            input_content = result;
+                            input.disabled = false;
+                        }
                     });
                 } else if (settings.data) {
                     input_content = settings.data;
@@ -287,9 +287,11 @@
                 }
 
                 // clear the loadtext that we put here before
-                $(self).html('');
+                $(self)
+                    .html('');
 
-                $(self).append(form);
+                $(self)
+                    .append(form);
 
                 // execute the showfn
                 if (settings.showfn && $.isFunction(settings.showfn)) {
@@ -300,7 +302,8 @@
                 plugin.apply(form, [settings, self]);
 
                 /* Focus to first visible form element. */
-                form.find(':input:visible:enabled:first').trigger('focus');
+                form.find(':input:visible:enabled:first')
+                    .trigger('focus');
 
                 /* Highlight input contents when requested. */
                 if (settings.select) {
@@ -308,16 +311,17 @@
                 }
 
                 /* discard changes if pressing esc */
-                $(this).on('keydown', function(e) {
-                    if (e.which === 27) {
-                        e.preventDefault();
-                        reset.apply(form, [settings, self]);
-                    /* allow shift+enter to submit form (required for textarea) */
-                    } else if (e.which == 13 && e.shiftKey){
-                        e.preventDefault();
-                        form.trigger('submit');
-                    }
-                });
+                $(this)
+                    .on('keydown', function(e) {
+                        if (e.which === 27) {
+                            e.preventDefault();
+                            reset.apply(form, [settings, self]);
+                            /* allow shift+enter to submit form (required for textarea) */
+                        } else if (e.which == 13 && e.shiftKey) {
+                            e.preventDefault();
+                            form.trigger('submit');
+                        }
+                    });
 
                 /* Discard, submit or nothing with changes when clicking outside. */
                 /* Do nothing is usable when navigating with tab. */
@@ -330,16 +334,16 @@
                     });
                 } else if ('submit' === settings.onblur) {
                     input.on('blur', function(e) {
-						// Only allow the blur to do the submissions if the user did not click on the submit button
-						// We check this by taking a look at the elements that the mouse is hovering over and see that none of them is of the type "submit"
-						// The original check to prevent such a duplicate submission worked by setting a timeout
-						// However, this would mean that a non-existing form element would get submitted, which resulted in a full page refresh
-						var target = document.querySelectorAll( ":hover" );
-					
-						if (! _.find(target, function(el) {return el.type == 'submit'}))
-							{	
-								form.submit();
-							}});
+                        // Only allow the blur to do the submissions if the user did not click on the submit button
+                        // We check this by taking a look at the elements that the mouse is hovering over and see that none of them is of the type "submit"
+                        // The original check to prevent such a duplicate submission worked by setting a timeout
+                        // However, this would mean that a non-existing form element would get submitted, which resulted in a full page refresh
+                        var target = document.querySelectorAll(":hover");
+
+                        if (!_.find(target, function(el) {return el.type == 'submit'})) {
+                            form.submit();
+                        }
+                    });
                 } else if ($.isFunction(settings.onblur)) {
                     input.on('blur', function(e) {
                         // reset the form if the onblur function returns false
@@ -375,89 +379,122 @@
                         isSubmitting = false !== submit.apply(form, [settings, self]);
                         if (isSubmitting) {
 
-                          /* Check if given target is function */
-                          if ($.isFunction(settings.target)) {
-                             /* Callback function to handle the target reponse */
-                              var responseHandler = function(value, complete) {
-                                  isSubmitting = false;
-                                  if (false !== complete) {
-                                      // INTERCEPT
-                                      var result = intercept.apply(self, [value, status]);
-                                      $(self).html(result);
-                                      self.editing = false;
-                                      callback.apply(self, [self.innerText, settings]);
-                                      if (!$.trim($(self).html())) {
-                                          $(self).html(settings.placeholder);
-                                      }
-                                  }
-                              };
-                              /* Call the user target function */
-                              var userTarget = settings.target.apply(self, [input.val(), settings, responseHandler]);
-                              /* Handle the target function return for compatibility */
-                              if (false !== userTarget && undefined !== userTarget) {
-                                  responseHandler(userTarget, userTarget);
-                              }
+                            /* Check if given target is function */
+                            if ($.isFunction(settings.target)) {
+                                /* Callback function to handle the target reponse */
+                                var responseHandler = function(value, complete) {
+                                    isSubmitting = false;
+                                    if (false !== complete) {
+                                        // INTERCEPT
+                                        var result = intercept.apply(self, [value, status]);
+                                        $(self)
+                                            .html(result);
+                                        self.editing = false;
+                                        callback.apply(self, [self.innerText, settings]);
+                                        if (!$.trim($(self)
+                                            .html())) {
+                                            $(self)
+                                                .html(settings.placeholder);
+                                        }
+                                    }
+                                };
+                                /* Call the user target function */
+                                var userTarget = settings.target.apply(self, [input.val(), settings, responseHandler]);
+                                /* Handle the target function return for compatibility */
+                                if (false !== userTarget && undefined !== userTarget) {
+                                    responseHandler(userTarget, userTarget);
+                                }
 
-                          } else {
-                              /* Add edited content and id of edited element to POST. */
-                              var submitdata = {};
-                              submitdata[settings.name] = input.val();
-                              submitdata[settings.id] = self.id;
-                              /* Add extra data to be POST:ed. */
-                              if ($.isFunction(settings.submitdata)) {
-                                  $.extend(submitdata, settings.submitdata.apply(self, [self.revert, settings, submitdata]));
-                              } else {
-                                  $.extend(submitdata, settings.submitdata);
-                              }
+                            } else {
+                                /* Add edited content and id of edited element to POST. */
+                                var submitdata = {};
+                                submitdata[settings.name] = input.val();
+                                submitdata[settings.id] = self.id;
+                                /* Add extra data to be POST:ed. */
+                                if ($.isFunction(settings.submitdata)) {
+                                    $.extend(submitdata, settings.submitdata.apply(self, [self.revert, settings, submitdata]));
+                                } else {
+                                    $.extend(submitdata, settings.submitdata);
+                                }
 
-                              /* Quick and dirty PUT support. */
-                              if ('PUT' === settings.method) {
-                                  submitdata._method = 'put';
-                              }
+                                /* Quick and dirty PUT support. */
+                                if ('PUT' === settings.method) {
+                                    submitdata._method = 'put';
+                                }
 
-                              // SHOW INDICATOR
-                              $(self).html(settings.indicator);
+                                // SHOW INDICATOR
+                                $(self)
+                                    .html(settings.indicator);
 
-                              /* Defaults for ajaxoptions. */
-                              var ajaxoptions = {
-                                  type    : 'POST',
-                                  complete: function (xhr, status) {
-                                      isSubmitting = false;
-                                  },
-                                  data    : submitdata,
-                                  dataType: 'html',
-                                  url     : settings.target,
-                                  success : function(result, status) {
+                                /* Defaults for ajaxoptions. */
+                                var ajaxoptions = {
+                                    type: 'POST',
+                                    complete: function(xhr, status) {
+                                        isSubmitting = false;
+                                    },
+                                    data: submitdata,
+                                    dataType: 'html',
+                                    url: settings.target,
+                                    success: function(result, status) {
 
-                                      // INTERCEPT
-                                      result = intercept.apply(self, [result, status]);
+                                        // INTERCEPT
+                                        result = intercept.apply(self, [result, status]);
 
-                                      if (ajaxoptions.dataType === 'html') {
-                                        $(self).html(result);
-                                      }
-                                      self.editing = false;
-                                      callback.apply(self, [result, settings, submitdata]);
-                                      if (!$.trim($(self).html())) {
-                                          $(self).html(settings.placeholder);
-                                      }
-                                  },
-                                  error   : function(xhr, status, error) {
-                                      onerror.apply(form, [settings, self, xhr]);
-                                  }
-                              };
+                                        if (ajaxoptions.dataType === 'html') {
+                                            $(self)
+                                                .html(result);
+                                        }
+                                        self.editing = false;
+                                        callback.apply(self, [result, settings, submitdata]);
+                                        if (!$.trim($(self)
+                                            .html())) {
+                                            $(self)
+                                                .html(settings.placeholder);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        onerror.apply(form, [settings, self, xhr]);
+                                    }
+                                };
 
-                              /* Override with what is given in settings.ajaxoptions. */
-                              $.extend(ajaxoptions, settings.ajaxoptions);
-                              $.ajax(ajaxoptions);
+                                /* Override with what is given in settings.ajaxoptions. */
+                                $.extend(ajaxoptions, settings.ajaxoptions);
+                                $.ajax(ajaxoptions);
                             }
                         }
                     }
 
                     /* Show tooltip again. */
-                    $(self).attr('title', settings.tooltip);
+                    $(self)
+                        .attr('title', settings.tooltip);
                     return false;
                 });
+            };
+
+            /* Save so it can be later used by $.editable('destroy') */
+            $(this)
+                .data('event.editable', settings.event);
+
+            /* If element is empty add something clickable (if requested) */
+            if (!$.trim($(this)
+                .html())) {
+                $(this)
+                    .html(settings.placeholder);
+            }
+
+            if ('destroy' === target) {
+                destroy.apply($(this)
+                    .find('form'), [settings, self]);
+                return;
+            }
+
+            $(this).bind('openEditable', function () {
+                (openEditable.bind(this))(new Event(settings.event))
             });
+
+            // EVENT IS FIRED
+            $(this)
+                .on(settings.event, openEditable);
 
             // PRIVILEGED METHODS
 
@@ -467,14 +504,18 @@
                 if (self.editing) {
                     /* Before reset hook, if it returns false abort reseting. */
                     if (false !== onreset.apply(form, [settings, self])) {
-                        $(self).text(self.revert);
-                        self.editing   = false;
-                        if (!$.trim($(self).html())) {
-                            $(self).html(settings.placeholder);
+                        $(self)
+                            .text(self.revert);
+                        self.editing = false;
+                        if (!$.trim($(self)
+                            .html())) {
+                            $(self)
+                                .html(settings.placeholder);
                         }
                         /* Show tooltip again. */
                         if (settings.tooltip) {
-                            $(self).attr('title', settings.tooltip);
+                            $(self)
+                                .attr('title', settings.tooltip);
                         }
                     }
                 }
@@ -483,68 +524,75 @@
             // DESTROY
             self.destroy = function(form) {
                 $(self)
-                .off($(self).data('event.editable'))
-                .removeData('disabled.editable')
-                .removeData('event.editable');
+                    .off($(self)
+                        .data('event.editable'))
+                    .removeData('disabled.editable')
+                    .removeData('event.editable');
 
                 self.clearTimeouts();
 
                 if (self.editing) {
-                     reset.apply(form, [settings, self]);
+                    reset.apply(form, [settings, self]);
                 }
             };
 
             // CLEARTIMEOUT
             self.clearTimeout = function(t) {
-                var timeouts = $(self).data('timeouts');
+                var timeouts = $(self)
+                    .data('timeouts');
                 clearTimeout(t);
-                if(timeouts) {
+                if (timeouts) {
                     var i = timeouts.indexOf(t);
-                    if(i > -1) {
+                    if (i > -1) {
                         timeouts.splice(i, 1);
-                        if(timeouts.length <= 0) {
-                            $(self).removeData('timeouts');
+                        if (timeouts.length <= 0) {
+                            $(self)
+                                .removeData('timeouts');
                         }
                     } else {
-                        console.warn('jeditable clearTimeout could not find timeout '+t);
+                        console.warn('jeditable clearTimeout could not find timeout ' + t);
                     }
                 }
             };
 
             // CLEAR ALL TIMEOUTS
-            self.clearTimeouts = function () {
-                var timeouts = $(self).data('timeouts');
-                if(timeouts) {
-                    for(var i = 0, n = timeouts.length; i < n; ++i) {
+            self.clearTimeouts = function() {
+                var timeouts = $(self)
+                    .data('timeouts');
+                if (timeouts) {
+                    for (var i = 0, n = timeouts.length; i < n; ++i) {
                         clearTimeout(timeouts[i]);
                     }
                     timeouts.length = 0;
-                    $(self).removeData('timeouts');
+                    $(self)
+                        .removeData('timeouts');
                 }
             };
 
             // SETTIMEOUT
             self.setTimeout = function(callback, time) {
-               var timeouts = $(self).data('timeouts');
-               var t = setTimeout(function() {
-                   callback();
-                   self.clearTimeout(t);
-               }, time);
-               if(!timeouts) {
-                   timeouts = [];
-                   $(self).data('timeouts', timeouts);
-               }
-               timeouts.push(t);
-               return t;
+                var timeouts = $(self)
+                    .data('timeouts');
+                var t = setTimeout(function() {
+                    callback();
+                    self.clearTimeout(t);
+                }, time);
+                if (!timeouts) {
+                    timeouts = [];
+                    $(self)
+                        .data('timeouts', timeouts);
+                }
+                timeouts.push(t);
+                return t;
             };
         });
     };
 
-var _supportInType = function (type) {
-    var i = document.createElement('input');
-    i.setAttribute('type', type);
-    return i.type !== 'text' ? type : 'text';
-};
+    var _supportInType = function (type) {
+        var i = document.createElement('input');
+        i.setAttribute('type', type);
+        return i.type !== 'text' ? type : 'text';
+    };
 
 
     $.editable = {
@@ -575,7 +623,7 @@ var _supportInType = function (type) {
                                     form.trigger('submit');
                                 }
                             });
-                        /* Otherwise use button with given string as text. */
+                            /* Otherwise use button with given string as text. */
                         } else {
                             submit = $('<button type="submit" />');
                             submit.html(settings.submit);
@@ -590,7 +638,7 @@ var _supportInType = function (type) {
                         /* If given html string use that. */
                         if (settings.cancel.match(/>$/)) {
                             cancel = $(settings.cancel);
-                        /* otherwise use button with given string as text */
+                            /* otherwise use button with given string as text */
                         } else {
                             cancel = $('<button type="cancel" />');
                             cancel.html(settings.cancel);
@@ -673,14 +721,14 @@ var _supportInType = function (type) {
             // SELECT
             select: {
                 element : function(settings, original) {
-                var select = $('<select />');
+                    var select = $('<select />');
 
-                if (settings.multiple) {
-                    select.attr('multiple', 'multiple');
-                }
+                    if (settings.multiple) {
+                        select.attr('multiple', 'multiple');
+                    }
 
-                $(this).append(select);
-                return(select);
+                    $(this).append(select);
+                    return(select);
                 },
                 content : function(data, settings, original) {
                     var json;
@@ -688,7 +736,7 @@ var _supportInType = function (type) {
                     if (String === data.constructor) {
                         json = JSON.parse(data);
                     } else {
-                    // Otherwise assume it is a hash already
+                        // Otherwise assume it is a hash already
                         json = data;
                     }
 
